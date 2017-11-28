@@ -1,0 +1,8 @@
+$queryBuilder=$repository->createQueryBuilder('u') //'u' arbitraire (user)
+			->where ("u.date=:date")
+			->setParameter(['date'=>$date->format('Y-m-d')])
+			->setMaxResults(10);
+		$query=$queryBuilder->getQuery();
+		$users=$query->getResult();
+	
+	
