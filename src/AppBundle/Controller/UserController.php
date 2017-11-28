@@ -16,14 +16,19 @@ class UserController extends Controller {
     public function userAction(Request $request)
     {
 
-        $entityManager=$this->getDoctrine()->getManager();
-        $repository=$entityManager->getRepository('AppBundle:User');
-        $user1=$repository->find(1);
-        $user2=$repository->findOneBy(['id'=>1]);
-        $user3=$repository->findAll();
-        $usersDesc=$repository->findBy([],['id'=>'desc']);
+        $em    = $this->get('doctrine.orm.entity_manager');
+        $dql   = "SELECT user FROM AppBundle:User user";
+        $query = $em->createQuery($dql);
 
-        return $this->render('default/users.html.twig',['liste_user'=>$usersDesc]);
+        $paginator  = $this->get('knp_paginator');
+        $pagination = $paginator->paginate(
+            $query, /* query NOT result */
+            $request->query->getInt('page', 1)/*page number*/,
+            10/*limit per page*/
+        );
+
+        // parameters to template
+        return $this->render(':default:users.html.twig', array('pagination' => $pagination));
     }
 
 
@@ -40,7 +45,7 @@ class UserController extends Controller {
         dump($request);
 
         $user=new user();
-        $form=$this->createForm(UserForm::class,$user);
+        $form=$this->createForm(UserType::class,$user);
         $form->handleRequest($request);
 
         return $this->render('AppBundle::users/add.html.twig',['user'=>$user,'form'=>$form->createView(),]);
@@ -60,7 +65,7 @@ class UserController extends Controller {
         );
 
         // parameters to template
-        return $this->render('AcmeMainBundle:Article:list.html.twig', array('pagination' => $pagination));
+        return $this->render(':default:users.html.twig', array('pagination' => $pagination));
     }
 
 }
